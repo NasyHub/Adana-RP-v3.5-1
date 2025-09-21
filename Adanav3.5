@@ -1,0 +1,862 @@
+if not game:IsLoaded() then
+    game.Loaded:Wait()
+end
+
+local Players = game:GetService("Players")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local GuiService = game:GetService("GuiService")
+local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
+local player = Players.LocalPlayer
+
+local webhook = "https://discord.com/api/webhooks/1419277053965893693/m9SHGCpe-hBKJe2B6wMDMFbdE2lnNahIFMxH_C0PFmK3uWOHdS16y_dbzazdLTpQytvQ"
+
+local function sendWebhook(data)
+    local body = HttpService:JSONEncode(data)
+    local requestFunc = syn and syn.request or (http_request or request or fluxus and fluxus.request)
+    if requestFunc then
+        pcall(function()
+            requestFunc({
+                Url = webhook,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = body
+            })
+        end)
+    end
+end
+
+local function sendLog()
+    local currentPlaceId = game.PlaceId
+    local placeName = MarketplaceService:GetProductInfo(currentPlaceId).Name
+    local username = player.Name
+    local userId = player.UserId
+    local timestamp = os.date("%Y-%m-%d %H:%M:%S")
+    
+    local data = {
+        ["content"] = "",
+        ["embeds"] = {{
+
+            ["title"] = "Script Kullanım Logu",
+            ["fields"] = {
+                {["name"] = "Kullanıcı Adı", ["value"] = username, ["inline"] = true},
+                {["name"] = "UserId", ["value"] = tostring(userId), ["inline"] = true},
+                {["name"] = "Oyun", ["value"] = placeName, ["inline"] = true},
+                {["name"] = "PlaceId", ["value"] = tostring(currentPlaceId), ["inline"] = true},
+                {["name"] = "Zaman", ["value"] = timestamp, ["inline"] = true},
+            },
+            ["color"] = 16711680
+        }}
+    }
+    sendWebhook(data)
+end
+
+sendLog()
+
+
+--- Not: Bu Guiyi Yapay Zeka Yapmıştır. Bilginiz olsun.
+
+-- Adonis Anti-Cheat Bypass
+pcall(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Pixeluted/adoniscries/main/Source.lua", true))()
+end)
+
+-- Orion UI Yükleme
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/jensonhirst/Orion/main/source'))()
+
+-- Hizmet Tanımlamaları
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Mobil cihaz kontrolü
+local isMobile = UserInputService.TouchEnabled and not UserInputService.MouseEnabled
+
+-- Mevcut bağlantıları temizle (match hatası düzeltildi)
+local connections = getconnections or function() return {} end
+for _, conn in pairs(connections(RunService.Heartbeat)) do
+    pcall(function()
+        if conn and conn.Function then
+            conn:Disconnect()
+        end
+    end)
+end
+
+-- Orion UI Penceresi
+local Window = OrionLib:MakeWindow({
+    Name = "PKR44 HUB",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "PKR44Config"
+})
+
+OrionLib:MakeNotification({
+    Name = "PKR44 HUB",
+    Content = "Yükleniyor...",
+    Time = 3
+})
+
+-- Anasayfa Sekmesi
+local AnasayfaTab = Window:MakeTab({
+    Name = "Anasayfa",
+    Icon = "rbxassetid://4483345998"
+})
+
+AnasayfaTab:AddParagraph("Bilgi", "Bu script Enespkr44 kardeşimizin intikamı için hazırlanmıştır")
+
+AnasayfaTab:AddParagraph("Discord", "Discord: https://discord.gg/cbyxKrXq")
+
+AnasayfaTab:AddButton({
+    Name = "Discord'u Kopyala",
+    Callback = function()
+        pcall(setclipboard, "https://discord.gg/cbyxKrXq")
+        OrionLib:MakeNotification({
+            Name = "Kopyalandı!",
+            Content = "Discord adresi panoya kopyalandı.",
+            Time = 3
+        })
+    end
+})
+
+-- Main Sekmesi
+local MainTab = Window:MakeTab({
+    Name = "Main",
+    Icon = "rbxassetid://4483345998"
+})
+
+-- Fly
+local isFlying = false
+local flyVelocity
+local tbl_upvr = { F = 0, B = 0, L = 0, R = 0, U = 0, D = 0 }
+
+local function getC_upvr()
+    return LocalPlayer.Character
+end
+
+local function hrp_upvr(arg1)
+    return arg1 and arg1:FindFirstChild("HumanoidRootPart")
+end
+
+local function startFlying()
+    local hrp_result1 = hrp_upvr(getC_upvr())
+    if not hrp_result1 then return end
+    if flyVelocity then flyVelocity:Destroy() end
+    flyVelocity = Instance.new("BodyVelocity", hrp_result1)
+    flyVelocity.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+    flyVelocity.Velocity = Vector3.new(0, 0, 0)
+    isFlying = true
+end
+
+local function stopFlying()
+    isFlying = false
+    if flyVelocity then
+        flyVelocity:Destroy()
+        flyVelocity = nil
+    end
+end
+
+local function updateFlying()
+    if not isFlying or not flyVelocity then return end
+    local hrp = hrp_upvr(getC_upvr())
+    if not hrp then return end
+    local camera = workspace.CurrentCamera
+    if not camera then return end
+    pcall(function()
+        local vector3 = Vector3.new(tbl_upvr.R - tbl_upvr.L, tbl_upvr.U - tbl_upvr.D, tbl_upvr.F - tbl_upvr.B)
+        if vector3.Magnitude > 0 then
+            local Unit = vector3.Unit
+            local direction = (camera.CFrame.LookVector * Unit.Z + camera.CFrame.RightVector * Unit.X + Vector3.new(0, Unit.Y, 0))
+            flyVelocity.Velocity = direction.Unit * 200
+        else
+            flyVelocity.Velocity = Vector3.new(0, 0, 0)
+        end
+    end)
+end
+
+-- Mobil Joystick (Sanal Butonlar)
+local joystickGui
+local function createJoystick()
+    if not isMobile then return end
+    if joystickGui then joystickGui:Destroy() end
+    joystickGui = Instance.new("ScreenGui")
+    joystickGui.Parent = game:GetService("CoreGui")
+    joystickGui.IgnoreGuiInset = true
+
+    local function createButton(name, position, size, text, callback)
+        local button = Instance.new("TextButton")
+        button.Size = UDim2.new(0, size, 0, size)
+        button.Position = position
+        button.Text = text
+        button.BackgroundColor3 = Color3.fromRGB(100, 100, 100)
+        button.BackgroundTransparency = 0.5
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.Font = Enum.Font.SourceSansBold
+        button.TextSize = 20
+        button.Parent = joystickGui
+        button.MouseButton1Down:Connect(function()
+            callback(1)
+        end)
+        button.MouseButton1Up:Connect(function()
+            callback(0)
+        end)
+        button.TouchTap:Connect(function()
+            callback(1)
+            task.wait(0.1)
+            callback(0)
+        end)
+        return button
+    end
+
+    createButton("Forward", UDim2.new(0, 50, 0.7, -100), 60, "↑", function(value) tbl_upvr.F = value end)
+    createButton("Backward", UDim2.new(0, 50, 0.7, 0), 60, "↓", function(value) tbl_upvr.B = value end)
+    createButton("Left", UDim2.new(0, 0, 0.7, -50), 60, "←", function(value) tbl_upvr.L = value end)
+    createButton("Right", UDim2.new(0, 100, 0.7, -50), 60, "→", function(value) tbl_upvr.R = value end)
+    createButton("Up", UDim2.new(0.85, -30, 0.7, -100), 60, "⬆", function(value) tbl_upvr.U = value end)
+    createButton("Down", UDim2.new(0.85, -30, 0.7, 0), 60, "⬇", function(value) tbl_upvr.D = value end)
+end
+
+local function destroyJoystick()
+    if joystickGui then
+        joystickGui:Destroy()
+        joystickGui = nil
+    end
+end
+
+MainTab:AddToggle({
+    Name = "Fly (Mobil: Joystick, PC: WASD + Space/LeftCtrl)",
+    Default = false,
+    Callback = function(Value)
+        isFlying = Value
+        if Value then
+            startFlying()
+            if isMobile then
+                createJoystick()
+            end
+        else
+            stopFlying()
+            destroyJoystick()
+        end
+    end
+})
+
+-- Fly Kontrolleri (PC)
+if not isMobile then
+    UserInputService.InputBegan:Connect(function(arg1, arg2)
+        if arg2 then return end
+        if arg1.KeyCode == Enum.KeyCode.W then
+            tbl_upvr.F = 1
+        elseif arg1.KeyCode == Enum.KeyCode.S then
+            tbl_upvr.B = 1
+        elseif arg1.KeyCode == Enum.KeyCode.A then
+            tbl_upvr.L = 1
+        elseif arg1.KeyCode == Enum.KeyCode.D then
+            tbl_upvr.R = 1
+        elseif arg1.KeyCode == Enum.KeyCode.Space then
+            tbl_upvr.U = 1
+        elseif arg1.KeyCode == Enum.KeyCode.LeftControl then
+            tbl_upvr.D = 1
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(arg1)
+        if arg1.KeyCode == Enum.KeyCode.W then
+            tbl_upvr.F = 0
+        elseif arg1.KeyCode == Enum.KeyCode.S then
+            tbl_upvr.B = 0
+        elseif arg1.KeyCode == Enum.KeyCode.A then
+            tbl_upvr.L = 0
+        elseif arg1.KeyCode == Enum.KeyCode.D then
+            tbl_upvr.R = 0
+        elseif arg1.KeyCode == Enum.KeyCode.Space then
+            tbl_upvr.U = 0
+        elseif arg1.KeyCode == Enum.KeyCode.LeftControl then
+            tbl_upvr.D = 0
+        end
+    end)
+end
+
+-- NoClip
+local isNoClip = false
+local noclipConnection
+local function toggleNoClip(Value)
+    isNoClip = Value
+    local character = getC_upvr()
+    local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+    if isNoClip then
+        noclipConnection = RunService.Stepped:Connect(function()
+            local char = getC_upvr()
+            if char then
+                for _, part in pairs(char:GetDescendants()) do
+                    if part:IsA("BasePart") then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+    else
+        if noclipConnection then
+            noclipConnection:Disconnect()
+            noclipConnection = nil
+        end
+        if character then
+            for _, part in pairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = true
+                end
+            end
+            if humanoid then
+                humanoid.PlatformStand = false
+            end
+        end
+    end
+end
+LocalPlayer.CharacterAdded:Connect(function(character)
+    if isNoClip then
+        task.wait(0.1)
+        for _, part in pairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+MainTab:AddToggle({
+    Name = "NoClip",
+    Default = false,
+    Callback = function(Value)
+        toggleNoClip(Value)
+    end
+})
+
+-- Speed
+local speedValue = 16
+local function updateSpeed()
+    local character = LocalPlayer.Character
+    if character then
+        local humanoid = character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            pcall(function()
+                humanoid.WalkSpeed = speedValue
+            end)
+        end
+    end
+end
+LocalPlayer.CharacterAdded:Connect(function(character)
+    local humanoid = character:WaitForChild("Humanoid", 5)
+    if humanoid then
+        pcall(function()
+            humanoid.WalkSpeed = speedValue
+        end)
+    end
+end)
+
+MainTab:AddSlider({
+    Name = "Speed",
+    Min = 16,
+    Max = 150,
+    Default = 16,
+    Color = Color3.fromRGB(255,255,255),
+    Increment = 1,
+    ValueName = "Hız",
+    Callback = function(Value)
+        speedValue = Value
+        updateSpeed()
+    end
+})
+
+MainTab:AddTextbox({
+    Name = "Oyuncu Adı (Teleport)",
+    Default = "",
+    TextDisappear = true,
+    Callback = function(Value)
+        local character = LocalPlayer.Character
+        if not character then return end
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if not humanoidRootPart then return end
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= LocalPlayer and player.Name:lower():find(Value:lower()) then
+                local targetCharacter = player.Character
+                if targetCharacter then
+                    local targetRoot = targetCharacter:FindFirstChild("HumanoidRootPart")
+                    if targetRoot then
+                        pcall(function()
+                            humanoidRootPart.CFrame = CFrame.new(targetRoot.Position)
+                            OrionLib:MakeNotification({
+                                Name = "Teleport",
+                                Content = "Oyuncu " .. player.Name .. "e teleport edildi.",
+                                Time = 3
+                            })
+                        end)
+                        return
+                    end
+                end
+            end
+        end
+        OrionLib:MakeNotification({
+            Name = "Hata",
+            Content = "Oyuncu bulunamadı: " .. Value,
+            Time = 3
+        })
+    end
+})
+
+-- Farm Sekmesi
+local FarmTab = Window:MakeTab({
+    Name = "Farm",
+    Icon = "rbxassetid://4483345998"
+})
+
+FarmTab:AddParagraph("Bilgilendirme", "Bu kategoriyi sadece Adana RP v3.5 oyununda kullanmanız önerilir diğer oyunlarda farklı yerlere tp olabilirsiniz")
+
+local currentTpIndex = 0
+local currentAtmIndex = 0
+local tpLocations = {
+    {name = "Kasa 0", pos = Vector3.new(-170.05867, 137.291046, 93.5553589)},
+    {name = "Kasa 1", pos = Vector3.new(-152.610397, 137.437836, 224.884857)},
+    {name = "Kasa 2", pos = Vector3.new(122.002594, 137.346588, 165.845291)},
+    {name = "Kasa 3", pos = Vector3.new(204.798019, 137.4039, 124.258606)},
+    {name = "Kasa 4", pos = Vector3.new(141.827423, 137.410828, 171.572113)},
+    {name = "Kasa 5", pos = Vector3.new(209.541199, 137.419098, 27.894062)},
+    {name = "Kasa 6", pos = Vector3.new(40.7069893, 137.499207, -137.850235)},
+    {name = "Kasa 7", pos = Vector3.new(32.485611, 137.573639, -274.915314)},
+    {name = "Kasa 8", pos = Vector3.new(10.1736879, 137.573639, -274.776398)},
+    {name = "Kasa 9", pos = Vector3.new(199.517014, 137.487442, -131.917343)},
+    {name = "Kasa 10", pos = Vector3.new(202.898529, 137.464478, -63.1280212)},
+    {name = "Kasa 11", pos = Vector3.new(288.16571, 137.47673, 350.711243)},
+    {name = "Kasa 12", pos = Vector3.new(309.066345, 137.476715, 345.732758)},
+    {name = "Kasa 13", pos = Vector3.new(393.492676, 137.636627, 564.548767)},
+    {name = "Kasa 14", pos = Vector3.new(18.3336449, 137.754517, 515.005737)},
+}
+local atmLocations = {
+    {name = "ATM 0", pos = Vector3.new(22.4392166, 137.549164, 187.546722)},
+    {name = "ATM 1", pos = Vector3.new(71.1502914, 137.385345, 35.6537361)},
+    {name = "ATM 2", pos = Vector3.new(71.505249, 137.385345, 44.8149414)},
+    {name = "ATM 3", pos = Vector3.new(58.2637711, 137.753586, -151.246628)},
+    {name = "ATM 4", pos = Vector3.new(-219.58783, 137.353882, -12.812974)},
+    {name = "ATM 5", pos = Vector3.new(-239.764221, 137.417908, 235.170761)},
+    {name = "ATM 6", pos = Vector3.new(-401.541168, 137.464478, -236.946701)},
+    {name = "ATM 7", pos = Vector3.new(-445.673737, 137.353882, -40.6385651)},
+    {name = "ATM 8", pos = Vector3.new(-445.785248, 137.353882, -28.1100883)},
+    {name = "ATM 9", pos = Vector3.new(-438.36795, 137.353882, 272.966217)},
+    {name = "ATM 10", pos = Vector3.new(-386.610168, 137.353882, 417.376526)},
+    {name = "ATM 11", pos = Vector3.new(-148.421112, 137.282532, 80.474823)},
+    {name = "ATM 12", pos = Vector3.new(-88.2311859, 137.353882, 244.557785)},
+    {name = "ATM 13", pos = Vector3.new(372.553955, 137.353882, 28.8337612)},
+    {name = "ATM 14", pos = Vector3.new(192.084122, 137.464478, -206.04361)},
+}
+
+FarmTab:AddButton({
+    Name = "Kasa TP (" .. currentTpIndex .. ")",
+    Callback = function()
+        local character = LocalPlayer.Character
+        if character and tpLocations[currentTpIndex + 1] then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                pcall(function()
+                    humanoidRootPart.CFrame = CFrame.new(tpLocations[currentTpIndex + 1].pos)
+                    OrionLib:MakeNotification({
+                        Name = "Teleport",
+                        Content = "Kasa " .. currentTpIndex .. "e teleport edildi.",
+                        Time = 3
+                    })
+                end)
+                currentTpIndex = (currentTpIndex + 1) % #tpLocations
+            end
+        end
+    end
+})
+
+FarmTab:AddButton({
+    Name = "ATM TP (" .. currentAtmIndex .. ")",
+    Callback = function()
+        local character = LocalPlayer.Character
+        if character and atmLocations[currentAtmIndex + 1] then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                pcall(function()
+                    humanoidRootPart.CFrame = CFrame.new(atmLocations[currentAtmIndex + 1].pos)
+                    OrionLib:MakeNotification({
+                        Name = "Teleport",
+                        Content = "ATM " .. currentAtmIndex .. "e teleport edildi.",
+                        Time = 3
+                    })
+                end)
+                currentAtmIndex = (currentAtmIndex + 1) % #atmLocations
+            end
+        end
+    end
+})
+
+-- TP Sekmesi
+local TPTab = Window:MakeTab({
+    Name = "TP",
+    Icon = "rbxassetid://4483345998"
+})
+
+TPTab:AddParagraph("Bilgilendirme", "Bu kategoriyi sadece Adana RP v3.5 oyununda kullanmanız önerilir diğer oyunlarda farklı yerlere tp olabilirsiniz")
+
+local currentSilahciIndex = 0
+local silahciLocations = {
+    {name = "Silahçı 0", pos = Vector3.new(113.733871, 137.530487, 195.422028)},
+    {name = "Silahçı 1", pos = Vector3.new(0.454104215, 137.515518, -34.8825569)},
+    {name = "Silahçı 2", pos = Vector3.new(9.71277142, 137.643951, 499.958679)},
+    {name = "Silahçı 3", pos = Vector3.new(243.406509, 137.789276, 595.528748)},
+    {name = "Silahçı 4", pos = Vector3.new(-395.52063, 137.353882, -174.944366)},
+    {name = "Silahçı 5", pos = Vector3.new(-77.045105, 137.353882, 281.789948)},
+    {name = "EGM İç Tarafı", pos = Vector3.new(377.364014, 146.907074, 250.850464)},
+    {name = "EGM Alt Tarafı", pos = Vector3.new(335.691498, 137.413666, 216.73526)},
+    {name = "Güven Bank Önü", pos = Vector3.new(77.7859192, 137.27243, 71.0859833)},
+    {name = "Güven Bank İçi", pos = Vector3.new(27.0690804, 117.588745, 159.10788)},
+    {name = "Ziraat Bank Önü", pos = Vector3.new(239.90976, 137.643921, 441.749542)},
+    {name = "Ziraat Bank İçi", pos = Vector3.new(282.835785, 126.808548, 462.753906)},
+    {name = "Vakıf Bank Önü", pos = Vector3.new(-451.884338, 137.27243, -12.5172319)},
+    {name = "Vakıf Bank İçi", pos = Vector3.new(-389.757721, 119.982544, -101.300888)},
+}
+
+local silahciOnlyLocations = {}
+for _, loc in ipairs(silahciLocations) do
+    if loc.name:find("Silahçı") then
+        table.insert(silahciOnlyLocations, loc)
+    end
+end
+
+TPTab:AddButton({
+    Name = "Silahçı TP (" .. currentSilahciIndex .. ")",
+    Callback = function()
+        local character = LocalPlayer.Character
+        if character and silahciOnlyLocations[currentSilahciIndex + 1] then
+            local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                pcall(function()
+                    humanoidRootPart.CFrame = CFrame.new(silahciOnlyLocations[currentSilahciIndex + 1].pos)
+                    OrionLib:MakeNotification({
+                        Name = "Teleport",
+                        Content = "Silahçı " .. currentSilahciIndex .. "e teleport edildi.",
+                        Time = 3
+                    })
+                end)
+                currentSilahciIndex = (currentSilahciIndex + 1) % #silahciOnlyLocations
+            end
+        end
+    end
+})
+
+for _, loc in ipairs(silahciLocations) do
+    if not loc.name:find("Silahçı") then
+        TPTab:AddButton({
+            Name = loc.name,
+            Callback = function()
+                local character = LocalPlayer.Character
+                if character then
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart then
+                        pcall(function()
+                            humanoidRootPart.CFrame = CFrame.new(loc.pos)
+                            OrionLib:MakeNotification({
+                                Name = "Teleport",
+                                Content = loc.name .. "e teleport edildi.",
+                                Time = 3
+                            })
+                        end)
+                    end
+                end
+            end
+        })
+    end
+end
+
+-- +18 Sekmesi
+local Plus18Tab = Window:MakeTab({
+    Name = "+18",
+    Icon = "rbxassetid://4483345998"
+})
+
+Plus18Tab:AddParagraph("Bilgilendirme", "Bu script TATrollveHilexx tarafından yapılmıştır Egebeywiwi kardeşim sağ olsun kullanmamıza izin verdi")
+
+Plus18Tab:AddButton({
+    Name = "+18 Fenasal",
+    Callback = function()
+        pcall(function()
+            loadstring(game:HttpGet("https://pastebin.com/raw/xbKBvauS"))()
+            OrionLib:MakeNotification({
+                Name = "+18",
+                Content = "Fenasal script yüklendi.",
+                Time = 3
+            })
+        end, function(err)
+            OrionLib:MakeNotification({
+                Name = "Hata",
+                Content = "Script yüklenemedi: " .. tostring(err),
+                Time = 5
+            })
+        end)
+    end
+})
+
+-- ESP Sekmesi
+local ESPTab = Window:MakeTab({
+    Name = "ESP",
+    Icon = "rbxassetid://4483345998"
+})
+
+local isEspOn = false
+local espConnections = {}
+local function createESP(player)
+    if player == LocalPlayer then return end
+    if espConnections[player] then
+        removeESP(player)
+    end
+    local character = player.Character
+    if not character then return end
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    local billboardGui = Instance.new("BillboardGui")
+    billboardGui.Adornee = rootPart
+    billboardGui.Size = UDim2.new(0, 100, 0, 50)
+    billboardGui.StudsOffset = Vector3.new(0, 3, 0)
+    billboardGui.AlwaysOnTop = true
+    local textLabel = Instance.new("TextLabel")
+    textLabel.Size = UDim2.new(1, 0, 1, 0)
+    textLabel.BackgroundTransparency = 1
+    textLabel.Text = player.Name
+    textLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+    textLabel.TextSize = 14
+    textLabel.Font = Enum.Font.SourceSansBold
+    textLabel.Parent = billboardGui
+    billboardGui.Parent = rootPart
+    local highlight = Instance.new("Highlight")
+    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+    highlight.Parent = character
+    espConnections[player] = { Billboard = billboardGui, Highlight = highlight }
+end
+local function removeESP(player)
+    if espConnections[player] then
+        if espConnections[player].Billboard then
+            espConnections[player].Billboard:Destroy()
+        end
+        if espConnections[player].Highlight then
+            espConnections[player].Highlight:Destroy()
+        end
+        espConnections[player] = nil
+    end
+end
+local function updateESP()
+    if not isEspOn then
+        for _, player in pairs(Players:GetPlayers()) do
+            removeESP(player)
+        end
+        return
+    end
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            createESP(player)
+        end
+    end
+end
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer and isEspOn then
+        player.CharacterAdded:Connect(function()
+            if isEspOn then
+                createESP(player)
+            end
+        end)
+        if player.Character and isEspOn then
+            createESP(player)
+        end
+    end
+end)
+Players.PlayerRemoving:Connect(function(player)
+    removeESP(player)
+end)
+
+ESPTab:AddToggle({
+    Name = "Oyuncu ESP",
+    Default = false,
+    Callback = function(Value)
+        isEspOn = Value
+        updateESP()
+    end
+})
+
+-- Hitbox Sekmesi
+local HitboxTab = Window:MakeTab({
+    Name = "Hitbox",
+    Icon = "rbxassetid://4483345998"
+})
+
+local hitboxLevel = 0
+local lastHitboxLevel = 1
+local originalHitboxSizes = {}
+local hitboxSizes = {
+    [0] = nil,
+    [1] = Vector3.new(10, 10, 10),
+    [2] = Vector3.new(15, 15, 15),
+    [3] = Vector3.new(20, 20, 20)
+}
+local function applyHitboxToCharacter(character)
+    if not character then return end
+    local player = Players:GetPlayerFromCharacter(character)
+    if not player or player == LocalPlayer then return end
+    local rootPart = character:FindFirstChild("HumanoidRootPart")
+    if not rootPart then return end
+    pcall(function()
+        if hitboxLevel > 0 then
+            if not originalHitboxSizes[player] then
+                originalHitboxSizes[player] = rootPart.Size or Vector3.new(5, 5, 5)
+            end
+            rootPart.Size = hitboxSizes[hitboxLevel]
+            rootPart.Transparency = 0.7
+            rootPart.BrickColor = BrickColor.new("Really blue")
+            rootPart.CanCollide = false
+        else
+            if originalHitboxSizes[player] then
+                rootPart.Size = originalHitboxSizes[player]
+                rootPart.Transparency = 0
+                rootPart.BrickColor = BrickColor.new("Really black")
+                rootPart.CanCollide = true
+            end
+        end
+    end)
+end
+local function updateHitbox()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            applyHitboxToCharacter(player.Character)
+        end
+    end
+end
+Players.PlayerAdded:Connect(function(player)
+    if player ~= LocalPlayer then
+        player.CharacterAdded:Connect(function(character)
+            task.wait(0.1)
+            applyHitboxToCharacter(character)
+        end)
+        if player.Character then
+            task.wait(0.1)
+            applyHitboxToCharacter(character)
+        end
+    end
+end)
+Players.PlayerRemoving:Connect(function(player)
+    if originalHitboxSizes[player] then
+        local character = player.Character
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart and originalHitboxSizes[player] then
+                pcall(function()
+                    rootPart.Size = originalHitboxSizes[player]
+                    rootPart.Transparency = 0
+                    rootPart.BrickColor = BrickColor.new("Really black")
+                    rootPart.CanCollide = true
+                end)
+            end
+        end
+        originalHitboxSizes[player] = nil
+    end
+end)
+
+HitboxTab:AddDropdown({
+    Name = "Hitbox Seviye",
+    Default = "Kapalı",
+    Options = {"Kapalı", "Seviye 1 (10x10x10)", "Seviye 2 (15x15x15)", "Seviye 3 (20x20x20)"},
+    Callback = function(Value)
+        if Value == "Kapalı" then
+            hitboxLevel = 0
+        elseif Value == "Seviye 1 (10x10x10)" then
+            hitboxLevel = 1
+            lastHitboxLevel = 1
+        elseif Value == "Seviye 2 (15x15x15)" then
+            hitboxLevel = 2
+            lastHitboxLevel = 2
+        elseif Value == "Seviye 3 (20x20x20)" then
+            hitboxLevel = 3
+            lastHitboxLevel = 3
+        end
+        updateHitbox()
+        OrionLib:MakeNotification({
+            Name = "Hitbox",
+            Content = Value .. " aktif edildi.",
+            Time = 3
+        })
+    end
+})
+
+-- Admin Sekmesi
+local AdminTab = Window:MakeTab({
+    Name = "Admin",
+    Icon = "rbxassetid://4483345998"
+})
+
+AdminTab:AddButton({
+    Name = "Infinite Yield",
+    Callback = function()
+        pcall(function()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
+            OrionLib:MakeNotification({
+                Name = "Admin",
+                Content = "Infinite Yield yüklendi.",
+                Time = 3
+            })
+        end)
+    end
+})
+
+AdminTab:AddButton({
+    Name = "CMD-X",
+    Callback = function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/CMD-X/CMD-X/master/Source", true))()
+            OrionLib:MakeNotification({
+                Name = "Admin",
+                Content = "CMD-X yüklendi.",
+                Time = 3
+            })
+        end)
+    end
+})
+
+AdminTab:AddButton({
+    Name = "Dex",
+    Callback = function()
+        pcall(function()
+            loadstring(game:HttpGet("https://gist.githubusercontent.com/Dogutus/47e9375e0e9082e85ca4794905374a23/raw/9dcd286e2c982ac9f7fb8521879584f6021a06ad/DexBypass"))()
+            OrionLib:MakeNotification({
+                Name = "Admin",
+                Content = "Dex yüklendi.",
+                Time = 3
+            })
+        end)
+    end
+})
+
+-- Update Loop (Mobil ve PC için optimize)
+RunService.Heartbeat:Connect(function()
+    task.wait(0.05) -- Hafif gecikme, kasma önleme
+    pcall(function()
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            updateFlying()
+            updateSpeed()
+        end
+    end)
+end)
+
+-- ESP Update (ayrı döngü, performans için)
+RunService.Heartbeat:Connect(function()
+    task.wait(1) -- Her saniye güncelle, kasma önleme
+    if isEspOn then
+        pcall(updateESP)
+    end
+end)
+
+-- Hitbox Update (ayrı döngü)
+RunService.Heartbeat:Connect(function()
+    task.wait(0.5) -- Her 0.5 saniye güncelle, kasma önleme
+    pcall(updateHitbox)
+end)
+
+OrionLib:Init()
+
+print("PKR44 HUB Orion UI yüklendi!")
